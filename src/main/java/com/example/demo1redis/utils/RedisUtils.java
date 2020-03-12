@@ -162,4 +162,33 @@ public class RedisUtils {
         }
         return  true;
     }
+
+    /**
+     * 添加  setnx分布式锁
+     * @param key
+     * @param value
+     * @return
+     * @throws Exception
+     */
+    public boolean setnx(final String key,final String value)throws Exception{
+        return redisTemplate.execute(new RedisCallback<Boolean>() {
+            @Override
+            public Boolean doInRedis(RedisConnection redisConnection) throws DataAccessException {
+                boolean flag=false;
+
+                try {
+                    redisTemplate.setKeySerializer(new StringRedisSerializer());
+                    redisTemplate.setValueSerializer(new StringRedisSerializer());
+                    StringRedisSerializer stringRedisSerializer=new StringRedisSerializer();
+                    byte keys[]=stringRedisSerializer.serialize(key);
+                    byte values[]=stringRedisSerializer.serialize(value);
+                    flag=redisConnection.setNX(keys,values);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+                    return flag;
+                }
+            }
+        });
+    }
 }
